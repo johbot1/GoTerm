@@ -19,7 +19,7 @@ func main() {
 	fmt.Printf("Hello %v! Welcome to the number guessing game!\n", name)
 	fmt.Println("The goal of the game is to guess the number I'm thinking of.")
 	fmt.Println("Each difficulty gives you a different amount of chances to guess my number. Good luck!")
-	var playing bool = true
+	var playing = true
 	for playing {
 		fmt.Printf("Select Difficulty:\n1. Easy (5 Guesses) \n2. Medium (5 Guesses) \n3. Hard (3 Guesses)\n")
 
