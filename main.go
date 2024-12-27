@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -34,22 +35,50 @@ func main() {
 		}
 
 		// Valid input
+		name = toSnakeCase(name)
 		break
 	}
-
+	//How to Play instructions
 	fmt.Printf("Hello %v! Welcome to the number guessing game!\n", name)
-	fmt.Println("The goal of the game is to guess the number I'm thinking of.")
-	fmt.Println("Each difficulty gives you a different amount of chances to guess my number. Good luck!")
-
-	//Difficulty Selection and input validation
+	//Main Loop; When finishing a game, return to THIS point
 	for playing {
-		fmt.Printf("Select Difficulty:\n1. Easy (5 Guesses, 1-50) \n2. Medium (5 Guesses, 1-75) \n3. Hard (3 Guesses, 1- 33)\n")
+		fmt.Println("The goal of the game is to guess the number I'm thinking of.")
+		fmt.Println("Each difficulty gives you a different amount of chances to guess my number. Good luck!")
+		time.Sleep(2 * time.Second)
 
-		//Select Difficulty
-		var difficulty int
+		difficultySelection()
+	}
+
+}
+
+// randomNumber generates a random integer between the given min and max values (inclusive).
+// Generated with JetBrains AI code commenting
+func randomNumber(min, max int) int {
+	fmt.Println("Generating Number...")
+	time.Sleep(1 * time.Second)
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(max-min+1) + min
+}
+
+// difficultySelection prompts the user to select a difficulty level and initiates the number-guessing game accordingly.
+// Generated with JetBrains AI code commenting
+func difficultySelection() {
+	var difficulty int
+	for {
+		fmt.Println("Select Difficulty:")
+		fmt.Println("1. Easy (5 Guesses, 1-50)")
+		fmt.Println("2. Medium (5 Guesses, 1-75)")
+		fmt.Println("3. Hard (3 Guesses, 1-33)")
+
+		//Validate Input
 		_, err := fmt.Scanln(&difficulty)
 		if err != nil {
-			return
+			// Handle non-integer input
+			fmt.Println("Invalid input. Please enter a number between 1 and 3.")
+			// Clear the input
+			var discard string
+			_, _ = fmt.Scanln(&discard)
+			continue
 		} else if difficulty < 1 || difficulty > 3 {
 			fmt.Println("Invalid input. Please enter 1, 2, or 3.")
 		}
@@ -62,26 +91,17 @@ func main() {
 			play(easyNumber, 5)
 		case 2:
 			fmt.Printf("Difficulty Selected: %v Medium (5 Guesses)\n", difficulty)
-			mediumNumber := randomNumber(1, 100)
-			fmt.Println(mediumNumber)
+			mediumNumber := randomNumber(1, 75)
+			play(mediumNumber, 5)
 		case 3:
 			fmt.Printf("Difficulty Selected: %v Hard (3 Guesses)\n", difficulty)
-			hardNumber := randomNumber(1, 100)
-			fmt.Println(hardNumber)
+			hardNumber := randomNumber(1, 33)
+			play(hardNumber, 3)
 		default:
 			fmt.Println("Invalid selection. Please choose 1, 2, or 3.")
 		}
-
+		break
 	}
-}
-
-// randomNumber generates a random integer between the given min and max values (inclusive).
-// Generated with JetBrains AI code commenting
-func randomNumber(min, max int) int {
-	fmt.Println("Generating Number...")
-	time.Sleep(1 * time.Second)
-	rand.Seed(time.Now().UnixNano())
-	return rand.Intn(max-min+1) + min
 }
 
 // play initiates a number-guessing game where the user attempts to guess the target within a limited number of guesses.
@@ -93,7 +113,7 @@ func play(target int, totalGuesses int) {
 	time.Sleep(1 * time.Second)
 
 	//Guess input begin
-	for i := 0; i < totalGuesses; i++ {
+	for i := 0; i <= totalGuesses; i++ {
 		fmt.Print("Guess: ")
 		var guess int
 		_, err := fmt.Scanln(&guess)
@@ -111,6 +131,15 @@ func play(target int, totalGuesses int) {
 			fmt.Println("Colder!")
 		}
 
+		if guess > 100 || guess < 0 {
+			if i > 0 {
+				i = i - 1
+			}
+			fmt.Println("Invalid input. Please enter a number more reasonable.")
+			fmt.Println("I'll let you off the hook for that one. You have", totalGuesses-i, "guesses remaining.")
+			continue
+		}
+
 		//Win Condition
 		if guess == target {
 			gameOver(target, i, true)
@@ -122,7 +151,7 @@ func play(target int, totalGuesses int) {
 			fmt.Println("Last guess! Here's hoping you get it right!")
 			time.Sleep(1 * time.Second)
 		} else if i == totalGuesses-1 {
-			fmt.Printf("You ran out of guesses! The correct number was %v.", target)
+			fmt.Printf("You ran out of guesses!")
 			gameOver(target, i, false)
 		}
 	}
@@ -136,23 +165,29 @@ func gameOver(correctNumber int, guessesLeft int, win bool) {
 	} else {
 		fmt.Printf("\nGame Over! Womp womp! The correct number was %v.", correctNumber)
 	}
-	fmt.Printf("\nWould you like to play again?\n1. Yes, 2. No ")
 
 	//Play Again input and validation
+	fmt.Printf("\nWould you like to play again?\n1. Yes, 2. No ")
 	var playAgain int
-	_, err := fmt.Scanln(&playAgain)
-	if err != nil {
-		return
-	} else if playAgain < 1 || playAgain > 2 {
-		fmt.Println("Invalid input. Please enter 1 or 2.")
+	for {
+		_, err := fmt.Scanln(&playAgain)
+		if err != nil {
+			return
+		} else if playAgain < 1 || playAgain > 2 {
+			fmt.Println("Invalid input. Please enter 1 or 2.")
+		}
+		if playAgain == 1 {
+			fmt.Println("The grind never stops")
+			return //Continue the Loop uninterrupted
+		} else if playAgain == 2 {
+			fmt.Println("Thank you for playing!! Goodbye!")
+			playing = false //Break the Loop
+		} else {
+			fmt.Println("Invalid input. Please enter 1 or 2.")
+		}
+
 	}
 
-	if playAgain == 1 {
-		return //Continue the Loop uninterrupted
-	}
-	if playAgain == 2 {
-		playing = false //Break the Loop
-	}
 }
 
 // Function to validate if a string contains alphabetical characters only
@@ -169,4 +204,17 @@ func validateAlphabetical(input string) bool {
 		return false
 	}
 	return match
+}
+
+// Function to capitalize the first letter of a string
+func toSnakeCase(input string) string {
+	// Convert input to lowercase
+	input = strings.ToLower(input)
+
+	// Capitalize the first letter
+	return strings.ToUpper(string(input[0])) + input[1:]
+}
+
+func reset() {
+
 }
