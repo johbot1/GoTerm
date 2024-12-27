@@ -130,7 +130,7 @@ func play(target int, totalGuesses int) {
 		}
 		fmt.Println("You guessed", guess)
 
-		//Warmer/Colder: Guess is off by 10 in either direction
+		//Warmer/Colder: Guess is off in either direction
 		if guess > target {
 			fmt.Println("Too high!")
 		} else if guess < target {
@@ -138,6 +138,7 @@ func play(target int, totalGuesses int) {
 		}
 
 		//Wildly incorrect Guess
+		//Don't penalize player for it, but let em know it's wildly off
 		if guess > 100 || guess < 0 {
 			if i > 0 {
 				i = i - 1
