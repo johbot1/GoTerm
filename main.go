@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -18,37 +20,44 @@ var playing = true
 // Main function holding the beginning instructions and prompts for beginning the game
 func main() {
 	var name string
-	//Loop until a valid name is entered
+	scanner := bufio.NewScanner(os.Stdin)
+
+	// Loop until a valid name is entered
 	for {
-		fmt.Printf("Please Enter your Name (alphabetical only): ")
-		_, err := fmt.Scanln(&name) // Read the input
-		if err != nil {
-			fmt.Println("Error reading input. Please try again.")
+		fmt.Printf("Please Enter your Name (No spaces, only letters please): ")
+
+		// Read and store the input line
+		scanner.Scan()
+		name = scanner.Text()
+
+		// Trim spaces to avoid accidental leading/trailing spaces
+		name = strings.TrimSpace(name)
+
+		// Validate input using the updated validateName function
+		if !validateName(name) {
+			// Provide feedback and retry if validation fails
 			continue
 		}
 
-		// Validate input using regex
-		isValid := validateAlphabetical(name)
-		if !isValid {
-			fmt.Println("Invalid input. Please enter letters only, without spaces or special characters.")
-			continue
-		}
-
-		// Valid input
+		// Convert and format valid input
 		name = toSnakeCase(name)
 		break
 	}
+
 	//How to Play instructions
 	fmt.Printf("Hello %v! Welcome to the number guessing game!\n", name)
 	//Main Loop; When finishing a game, return to THIS point
+
 	for playing {
 		fmt.Println("The goal of the game is to guess the number I'm thinking of.")
 		fmt.Println("Each difficulty gives you a different amount of chances to guess my number. Good luck!")
 		time.Sleep(2 * time.Second)
-
 		difficultySelection()
+		if !playing {
+			break
+		}
 	}
-
+	fmt.Println("Thank you for playing!")
 }
 
 // randomNumber generates a random integer between the given min and max values (inclusive).
@@ -65,17 +74,17 @@ func randomNumber(min, max int) int {
 func difficultySelection() {
 	var difficulty int
 	for {
-		fmt.Println("Select Difficulty:")
-		fmt.Println("1. Easy (5 Guesses, 1-50)")
-		fmt.Println("2. Medium (5 Guesses, 1-75)")
-		fmt.Println("3. Hard (3 Guesses, 1-33)")
+		fmt.Println("Select Difficulty using the corresponding number (i.e. 1 for Easy):")
+		fmt.Println("1. Easy (10 Guesses, Range: 1-50)")
+		fmt.Println("2. Medium (5 Guesses, Range: 1-75)")
+		fmt.Println("3. Hard (3 Guesses, Range: 1-50)")
 
 		//Validate Input
-		_, err := fmt.Scanln(&difficulty)
+		_, err := fmt.Scan(&difficulty)
 		if err != nil {
 			// Handle non-integer input
 			fmt.Println("Invalid input. Please enter a number between 1 and 3.")
-			// Clear the input
+			// Clear any input
 			var discard string
 			_, _ = fmt.Scanln(&discard)
 			continue
@@ -88,14 +97,14 @@ func difficultySelection() {
 		case 1:
 			fmt.Printf("Difficulty Selected: %v Easy (5 Guesses)\n", difficulty)
 			easyNumber := randomNumber(1, 50)
-			play(easyNumber, 5)
+			play(easyNumber, 10)
 		case 2:
 			fmt.Printf("Difficulty Selected: %v Medium (5 Guesses)\n", difficulty)
 			mediumNumber := randomNumber(1, 75)
 			play(mediumNumber, 5)
 		case 3:
 			fmt.Printf("Difficulty Selected: %v Hard (3 Guesses)\n", difficulty)
-			hardNumber := randomNumber(1, 33)
+			hardNumber := randomNumber(1, 50)
 			play(hardNumber, 3)
 		default:
 			fmt.Println("Invalid selection. Please choose 1, 2, or 3.")
@@ -124,14 +133,13 @@ func play(target int, totalGuesses int) {
 		fmt.Println("You guessed", guess)
 
 		//Warmer/Colder: Guess is off by 10 in either direction
-		if guess > target && guess <= target+10 {
-			fmt.Println("Warmer!")
-		} else if guess < target && guess >= target-10 {
-			fmt.Println("Warmer!")
-		} else if guess > target+10 || guess <= target-10 {
-			fmt.Println("Colder!")
+		if guess > target {
+			fmt.Println("Too high!")
+		} else if guess < target {
+			fmt.Println("Too low!")
 		}
 
+		//Wildly incorrect Guess
 		if guess > 100 || guess < 0 {
 			if i > 0 {
 				i = i - 1
@@ -144,7 +152,7 @@ func play(target int, totalGuesses int) {
 		//Win Condition
 		if guess == target {
 			gameOver(target, i, true)
-			return
+			break
 		}
 
 		//Last guess notification + Game Over Condition
@@ -154,6 +162,7 @@ func play(target int, totalGuesses int) {
 		} else if i == totalGuesses-1 {
 			fmt.Printf("You ran out of guesses!")
 			gameOver(target, i, false)
+			break
 		}
 	}
 }
@@ -176,21 +185,33 @@ func gameOver(correctNumber int, guessesLeft int, win bool) {
 			return
 		} else if playAgain < 1 || playAgain > 2 {
 			fmt.Println("Invalid input. Please enter 1 or 2.")
-		}
-		if playAgain == 1 {
-			fmt.Println("The grind never stops")
-			return //Continue the Loop uninterrupted
-		} else if playAgain == 2 {
-			fmt.Println("Thank you for playing!! Goodbye!")
-			playing = false //Break the Loop
 		} else {
-			fmt.Println("Invalid input. Please enter 1 or 2.")
+			break
 		}
+	}
+	switch playAgain {
+	case 1:
+		fmt.Println("The grind never stops")
+	case 2:
+		playing = false // Exit the main loop
+		fmt.Println("Thank you for playing!! Goodbye!")
+		break
 	}
 }
 
 // Function to validate if a string contains alphabetical characters only
-func validateAlphabetical(input string) bool {
+func validateName(input string) bool {
+	// Check for empty strings
+	if strings.TrimSpace(input) == "" {
+		fmt.Println("Invalid input. Name cannot be empty.")
+		return false
+	}
+
+	// Check for spaces
+	if strings.Contains(input, " ") {
+		fmt.Println("Invalid input. Name cannot contain spaces.")
+		return false
+	}
 	//Check against the alphabet in lower and upper case
 	pattern := "^[A-Za-z]+$"
 	//CODE NOTE: The "^" indicates the start of the string, "$" denotes the end of the string
@@ -199,7 +220,7 @@ func validateAlphabetical(input string) bool {
 
 	//Check to see if there is any error in the matching. If there is, throw it.
 	if err != nil {
-		fmt.Println("Error occurred during validateAlphabetical:", err)
+		fmt.Println("Error occurred during validateName:", err)
 		return false
 	}
 	return match
@@ -212,9 +233,4 @@ func toSnakeCase(input string) string {
 
 	// Capitalize the first letter
 	return strings.ToUpper(string(input[0])) + input[1:]
-}
-
-// TODO: Reset Function for playing again
-func reset() {
-
 }
