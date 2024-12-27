@@ -81,15 +81,13 @@ func difficultySelection() {
 
 		//Validate Input
 		_, err := fmt.Scan(&difficulty)
-		if err != nil {
+		if err != nil || difficulty > 3 || difficulty < 1 {
 			// Handle non-integer input
 			fmt.Println("Invalid input. Please enter a number between 1 and 3.")
 			// Clear any input
 			var discard string
 			_, _ = fmt.Scanln(&discard)
 			continue
-		} else if difficulty < 1 || difficulty > 3 {
-			fmt.Println("Invalid input. Please enter 1, 2, or 3.")
 		}
 
 		//Difficulty Selection: Each difficulty will have their own max and amount of guesses
