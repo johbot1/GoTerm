@@ -113,6 +113,7 @@ func play(target int, totalGuesses int) {
 	time.Sleep(1 * time.Second)
 
 	//Guess input begin
+	//TODO: Validation for super high guesses
 	for i := 0; i <= totalGuesses; i++ {
 		fmt.Print("Guess: ")
 		var guess int
@@ -185,9 +186,7 @@ func gameOver(correctNumber int, guessesLeft int, win bool) {
 		} else {
 			fmt.Println("Invalid input. Please enter 1 or 2.")
 		}
-
 	}
-
 }
 
 // Function to validate if a string contains alphabetical characters only
@@ -215,6 +214,7 @@ func toSnakeCase(input string) string {
 	return strings.ToUpper(string(input[0])) + input[1:]
 }
 
+// TODO: Reset Function for playing again
 func reset() {
 
 }
