@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -15,9 +16,9 @@ import (
 //@Description: This is a number guessing game where the player is asked to guess a number.
 //The amount of guesses will vary from difficulty level.
 
-//TODO:fmt.Scan(&difficulty) does not handle invalid input
 //TODO:If a user enters non-numeric input, fmt.Scanln(&guess) fails without any noise
 //TODO: Guess check (guess > 100 || guess < 0) resets the guess count incorrectly.
+//TODO: Clean up ai comments.
 
 var playing = true
 
@@ -76,42 +77,36 @@ func randomNumber(min, max int) int {
 // difficultySelection prompts the user to select a difficulty level and initiates the number-guessing game accordingly.
 // Generated with JetBrains AI code commenting
 func difficultySelection() {
+	scanner := bufio.NewScanner(os.Stdin)
 	var difficulty int
+
 	for {
 		fmt.Println("Select Difficulty using the corresponding number (i.e. 1 for Easy):")
 		fmt.Println("1. Easy (10 Guesses, Range: 1-50)")
 		fmt.Println("2. Medium (5 Guesses, Range: 1-75)")
 		fmt.Println("3. Hard (3 Guesses, Range: 1-50)")
+		fmt.Print("Enter choice: ")
 
-		//Validate Input
-		_, err := fmt.Scan(&difficulty)
-		if err != nil || difficulty > 3 || difficulty < 1 {
-			// Handle non-integer input
+		scanner.Scan()
+		input := scanner.Text()
+
+		num, err := strconv.Atoi(input)
+		if err != nil || num < 1 || num > 3 {
 			fmt.Println("Invalid input. Please enter a number between 1 and 3.")
-			// Clear any input
-			var discard string
-			_, _ = fmt.Scanln(&discard)
 			continue
 		}
 
-		//Difficulty Selection: Each difficulty will have their own max and amount of guesses
-		switch difficulty {
-		case 1:
-			fmt.Printf("Difficulty Selected: %v Easy (5 Guesses)\n", difficulty)
-			easyNumber := randomNumber(1, 50)
-			play(easyNumber, 10)
-		case 2:
-			fmt.Printf("Difficulty Selected: %v Medium (5 Guesses)\n", difficulty)
-			mediumNumber := randomNumber(1, 75)
-			play(mediumNumber, 5)
-		case 3:
-			fmt.Printf("Difficulty Selected: %v Hard (3 Guesses)\n", difficulty)
-			hardNumber := randomNumber(1, 50)
-			play(hardNumber, 3)
-		default:
-			fmt.Println("Invalid selection. Please choose 1, 2, or 3.")
-		}
+		difficulty = num
 		break
+	}
+
+	switch difficulty {
+	case 1:
+		play(randomNumber(1, 50), 10)
+	case 2:
+		play(randomNumber(1, 75), 5)
+	case 3:
+		play(randomNumber(1, 50), 3)
 	}
 }
 
