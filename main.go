@@ -18,7 +18,6 @@ import (
 
 //TODO:If a user enters non-numeric input, fmt.Scanln(&guess) fails without any noise
 //TODO: Guess check (guess > 100 || guess < 0) resets the guess count incorrectly.
-//TODO: Clean up ai comments.
 
 var playing = true
 
@@ -65,17 +64,17 @@ func main() {
 	fmt.Println("Thank you for playing!")
 }
 
-// randomNumber generates a random integer between the given min and max values (inclusive).
-// Generated with JetBrains AI code commenting
-func randomNumber(min, max int) int {
+// generateRandomNumber generates an integer given the bounds of a low and high end.
+// It does this immediately, but gives a bit of a show by giving a message and waiting
+func generateRandomNumber(min, max int) int {
 	fmt.Println("Generating Number...")
 	time.Sleep(1 * time.Second)
 	rand.Seed(time.Now().UnixNano())
 	return rand.Intn(max-min+1) + min
 }
 
-// difficultySelection prompts the user to select a difficulty level and initiates the number-guessing game accordingly.
-// Generated with JetBrains AI code commenting
+// difficultySelection asks the user to choose a difficulty through printed messages
+// based on the difficulty selected.
 func difficultySelection() {
 	scanner := bufio.NewScanner(os.Stdin)
 	var difficulty int
@@ -102,16 +101,16 @@ func difficultySelection() {
 
 	switch difficulty {
 	case 1:
-		play(randomNumber(1, 50), 10)
+		play(generateRandomNumber(1, 50), 10)
 	case 2:
-		play(randomNumber(1, 75), 5)
+		play(generateRandomNumber(1, 75), 5)
 	case 3:
-		play(randomNumber(1, 50), 3)
+		play(generateRandomNumber(1, 50), 3)
 	}
 }
 
-// play initiates a number-guessing game where the user attempts to guess the target within a limited number of guesses.
-// Generated with JetBrains AI code commenting
+// play begins the game based on the previous difficulty and generated number choices
+// Informs player on their current progress, their guess, and if they win or lose
 func play(target int, totalGuesses int) {
 	fmt.Println("Generated a number!")
 	fmt.Println("You have", totalGuesses, "total guesses to guess the number.")
@@ -119,7 +118,6 @@ func play(target int, totalGuesses int) {
 	time.Sleep(1 * time.Second)
 
 	//Guess input begin
-	//TODO: Validation for super high guesses
 	for i := 0; i <= totalGuesses; i++ {
 		fmt.Print("Guess: ")
 		var guess int
@@ -165,8 +163,7 @@ func play(target int, totalGuesses int) {
 	}
 }
 
-// gameOver handles the end of the game by prompting the user to decide whether to play again or terminate the game.
-// Generated with JetBrains AI code commenting
+// gameOver handles the behavior of the end state when a player wins or loses.
 func gameOver(correctNumber int, guessesLeft int, win bool) {
 	if win {
 		fmt.Printf("You win! You got the right number: %v in %v guesses!", correctNumber, guessesLeft+1)
@@ -224,7 +221,8 @@ func validateName(input string) bool {
 	return match
 }
 
-// Function to capitalize the first letter of a string
+// toSnakeCase Function to capitalize the first letter of a string
+// I don't know if Go had a premade function for it, so I just made it quick.
 func toSnakeCase(input string) string {
 	// Convert input to lowercase
 	input = strings.ToLower(input)
