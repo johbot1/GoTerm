@@ -16,9 +16,6 @@ import (
 //@Description: This is a number guessing game where the player is asked to guess a number.
 //The amount of guesses will vary from difficulty level.
 
-//TODO:If a user enters non-numeric input, fmt.Scanln(&guess) fails without any noise
-//TODO: Guess check (guess > 100 || guess < 0) resets the guess count incorrectly.
-
 var playing = true
 
 // Main function holding the beginning instructions and prompts for beginning the game
@@ -112,6 +109,7 @@ func difficultySelection() {
 // play begins the game based on the previous difficulty and generated number choices
 // Informs player on their current progress, their guess, and if they win or lose
 func play(target int, totalGuesses int) {
+	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("Generated a number!")
 	fmt.Println("You have", totalGuesses, "total guesses to guess the number.")
 	fmt.Println("Good luck :^) ")
@@ -120,13 +118,28 @@ func play(target int, totalGuesses int) {
 	//Guess input begin
 	for i := 0; i <= totalGuesses; i++ {
 		fmt.Print("Guess: ")
-		var guess int
-		_, err := fmt.Scanln(&guess)
-		if err != nil {
-			return
-		}
-		fmt.Println("You guessed", guess)
+		scanner.Scan()
+		input := scanner.Text()
 
+		//Guess is not a number
+		//Inform them it's wrong, but don't penalize them for it
+		guess, err := strconv.Atoi(input)
+		if err != nil {
+			fmt.Println("Invalid input. Please enter a number.")
+			i-- // Don't count invalid input as an attempt
+			continue
+		}
+
+		//Wildly incorrect Guess
+		//Don't penalize player for it, but let em know it's wildly off
+		if guess < 1 || guess > 100 {
+			fmt.Println("Invalid input. Please enter a number more reasonable.")
+			fmt.Println("I'll let you off the hook for that one. You have", totalGuesses-i, "guesses remaining.")
+			i-- // Don't count invalid input as an attempt
+			continue
+		}
+
+		fmt.Println("You guessed", guess)
 		//Warmer/Colder: Guess is off in either direction
 		if guess > target {
 			fmt.Println("Too high!")
@@ -134,23 +147,11 @@ func play(target int, totalGuesses int) {
 			fmt.Println("Too low!")
 		}
 
-		//Wildly incorrect Guess
-		//Don't penalize player for it, but let em know it's wildly off
-		if guess > 100 || guess < 0 {
-			if i > 0 {
-				i = i - 1
-			}
-			fmt.Println("Invalid input. Please enter a number more reasonable.")
-			fmt.Println("I'll let you off the hook for that one. You have", totalGuesses-i, "guesses remaining.")
-			continue
-		}
-
 		//Win Condition
 		if guess == target {
 			gameOver(target, i, true)
 			break
 		}
-
 		//Last guess notification + Game Over Condition
 		if i == totalGuesses-2 {
 			fmt.Println("Last guess! Here's hoping you get it right!")
