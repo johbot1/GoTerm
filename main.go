@@ -15,6 +15,10 @@ import (
 //@Description: This is a number guessing game where the player is asked to guess a number.
 //The amount of guesses will vary from difficulty level.
 
+//TODO:fmt.Scan(&difficulty) does not handle invalid input
+//TODO:If a user enters non-numeric input, fmt.Scanln(&guess) fails without any noise
+//TODO: Guess check (guess > 100 || guess < 0) resets the guess count incorrectly.
+
 var playing = true
 
 // Main function holding the beginning instructions and prompts for beginning the game
