@@ -98,17 +98,28 @@ func difficultySelection() {
 
 	switch difficulty {
 	case 1:
-		play(generateRandomNumber(1, 50), 10)
+		play(generateRandomNumber(1, 50), 10, 1)
 	case 2:
-		play(generateRandomNumber(1, 75), 5)
+		play(generateRandomNumber(1, 75), 5, 2)
 	case 3:
-		play(generateRandomNumber(1, 50), 3)
+		play(generateRandomNumber(1, 50), 3, 2)
 	}
 }
 
 // play begins the game based on the previous difficulty and generated number choices
 // Informs player on their current progress, their guess, and if they win or lose
-func play(target int, totalGuesses int) {
+func play(target int, totalGuesses int, difficulty int) {
+	var difficultyCeiling int
+
+	switch difficulty {
+	case 1:
+		difficultyCeiling = 50
+	case 2:
+		difficultyCeiling = 75
+	case 3:
+		difficultyCeiling = 50
+	}
+
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("Generated a number!")
 	fmt.Println("You have", totalGuesses, "total guesses to guess the number.")
@@ -132,7 +143,7 @@ func play(target int, totalGuesses int) {
 
 		//Wildly incorrect Guess
 		//Don't penalize player for it, but let em know it's wildly off
-		if guess < 1 || guess > 100 {
+		if guess < 1 || guess > difficultyCeiling {
 			fmt.Println("Invalid input. Please enter a number more reasonable.")
 			fmt.Println("I'll let you off the hook for that one. You have", totalGuesses-i, "guesses remaining.")
 			i-- // Don't count invalid input as an attempt
