@@ -98,10 +98,13 @@ func difficultySelection() {
 	switch difficulty {
 	case 1:
 		play(generateRandomNumber(1, 50), 10, 1)
+		//fmt.Println("Selected 1!")
 	case 2:
 		play(generateRandomNumber(1, 75), 5, 2)
+		//fmt.Println("Selected 2!")
 	case 3:
 		play(generateRandomNumber(1, 50), 3, 2)
+		//fmt.Println("Selected 3!") //debug for difficulty "case 3 always true"
 	}
 }
 
