@@ -47,11 +47,10 @@ func main() {
 
 	//How to Play instructions
 	fmt.Printf("Hello %v! Welcome to the number guessing game!\n", name)
+	fmt.Println("The goal of the game is to guess the number I'm thinking of.")
+	fmt.Println("Each difficulty gives you a different amount of chances to guess my number. Good luck!")
 	//Main Loop; When finishing a game, return to THIS point
-
 	for playing {
-		fmt.Println("The goal of the game is to guess the number I'm thinking of.")
-		fmt.Println("Each difficulty gives you a different amount of chances to guess my number. Good luck!")
 		time.Sleep(2 * time.Second)
 		difficultySelection()
 		if !playing {
