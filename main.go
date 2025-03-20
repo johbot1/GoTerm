@@ -57,7 +57,6 @@ func main() {
 			break
 		}
 	}
-	fmt.Println("Thank you for playing!")
 }
 
 // generateRandomNumber generates an integer given the bounds of a low and high end.
