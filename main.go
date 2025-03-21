@@ -36,7 +36,7 @@ func main() {
 
 		// Validate input using the updated validateName function
 		if !validateName(name) {
-			// Provide feedback and retry if validation fails
+			//!!!**** Provide feedback and retry if validation fails
 			continue
 		}
 
@@ -51,7 +51,6 @@ func main() {
 	fmt.Println("Each difficulty gives you a different amount of chances to guess my number. Good luck!")
 	//Main Loop; When finishing a game, return to THIS point
 	for playing {
-		time.Sleep(2 * time.Second)
 		difficultySelection()
 		if !playing {
 			break
@@ -63,7 +62,7 @@ func main() {
 // It does this immediately, but gives a bit of a show by giving a message and waiting
 func generateRandomNumber(min, max int) int {
 	fmt.Println("Generating Number...")
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 	rand.Seed(time.Now().UnixNano())
 	return rand.Intn(max-min+1) + min
 }
@@ -111,7 +110,6 @@ func difficultySelection() {
 // Informs player on their current progress, their guess, and if they win or lose
 func play(target int, totalGuesses int, difficulty int) {
 	var difficultyCeiling int
-
 	switch difficulty {
 	case 1:
 		difficultyCeiling = 50
@@ -128,7 +126,7 @@ func play(target int, totalGuesses int, difficulty int) {
 	time.Sleep(1 * time.Second)
 
 	//Guess input begin
-	for i := 0; i <= totalGuesses; i++ {
+	for num_guesses := 0; num_guesses <= totalGuesses; num_guesses++ {
 		fmt.Print("Guess: ")
 		scanner.Scan()
 		input := scanner.Text()
@@ -138,7 +136,7 @@ func play(target int, totalGuesses int, difficulty int) {
 		guess, err := strconv.Atoi(input)
 		if err != nil {
 			fmt.Println("Invalid input. Please enter a number.")
-			i-- // Don't count invalid input as an attempt
+			num_guesses-- // Don't count invalid input as an attempt
 			continue
 		}
 
@@ -146,8 +144,8 @@ func play(target int, totalGuesses int, difficulty int) {
 		//Don't penalize player for it, but let em know it's wildly off
 		if guess < 1 || guess > difficultyCeiling {
 			fmt.Println("Invalid input. Please enter a number more reasonable.")
-			fmt.Println("I'll let you off the hook for that one. You have", totalGuesses-i, "guesses remaining.")
-			i-- // Don't count invalid input as an attempt
+			fmt.Println("I'll let you off the hook for that one. You have", totalGuesses-num_guesses, "guesses remaining.")
+			num_guesses-- // Don't count invalid input as an attempt
 			continue
 		}
 
@@ -161,16 +159,16 @@ func play(target int, totalGuesses int, difficulty int) {
 
 		//Win Condition
 		if guess == target {
-			gameOver(target, i, true)
+			gameOver(target, num_guesses, true)
 			break
 		}
 		//Last guess notification + Game Over Condition
-		if i == totalGuesses-2 {
+		if num_guesses == totalGuesses-2 {
 			fmt.Println("Last guess! Here's hoping you get it right!")
 			time.Sleep(1 * time.Second)
-		} else if i == totalGuesses-1 {
+		} else if num_guesses == totalGuesses-1 {
 			fmt.Printf("You ran out of guesses!")
-			gameOver(target, i, false)
+			gameOver(target, num_guesses, false)
 			break
 		}
 	}
