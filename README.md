@@ -18,8 +18,8 @@ Golang v.1.23.6 or higher
 
 
 # FEEDBACK
-- add gitignore
-- remove .idea files
+~~- add gitignore~~
+~~- remove .idea files~~
 - add better error display
 - better feedback for handling error input
 - Fix retry screen (y reruns the entire program)
