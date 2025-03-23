@@ -16,6 +16,31 @@ import (
 //@Description: This is a number guessing game where the player is asked to guess a number.
 //The amount of guesses will vary from difficulty level.
 
+const (
+	EasyDifficulty   = 1
+	MediumDifficulty = 2
+	HardDifficulty   = 3
+
+	EasyGuesses   = 10
+	MediumGuesses = 5
+	HardGuesses   = 3
+
+	EasyMinRange   = 1
+	EasyMaxRange   = 50
+	MediumMinRange = 1
+	MediumMaxRange = 75
+	HardMinRange   = 1
+	HardMaxRange   = 50
+
+	DifficultyOptions = 3
+
+	PlayAgainYes = "Y"
+	PlayAgainNo  = "N"
+
+	GeneratingNumberDelay = 2 * time.Second
+	FeedbackDelay         = 1 * time.Second
+)
+
 var playing = true
 
 // Main function holding the beginning instructions and prompts for beginning the game
@@ -36,7 +61,6 @@ func main() {
 
 		// Validate input using the updated validateName function
 		if !validateName(name) {
-			//!!!**** Provide feedback and retry if validation fails
 			continue
 		}
 
@@ -62,7 +86,7 @@ func main() {
 // It does this immediately, but gives a bit of a show by giving a message and waiting
 func generateRandomNumber(min, max int) int {
 	fmt.Println("Generating Number...")
-	time.Sleep(2 * time.Second)
+	time.Sleep(GeneratingNumberDelay)
 	rand.Seed(time.Now().UnixNano())
 	return rand.Intn(max-min+1) + min
 }
@@ -75,17 +99,17 @@ func difficultySelection() {
 
 	for {
 		fmt.Println("Select Difficulty using the corresponding number (i.e. 1 for Easy):")
-		fmt.Println("1. Easy (10 Guesses, Range: 1-50)")
-		fmt.Println("2. Medium (5 Guesses, Range: 1-75)")
-		fmt.Println("3. Hard (3 Guesses, Range: 1-50)")
+		fmt.Printf("%d. Easy (%d Guesses, Range: %d-%d)\n", EasyDifficulty, EasyGuesses, EasyMinRange, EasyMaxRange)
+		fmt.Printf("%d. Medium (%d Guesses, Range: %d-%d)\n", MediumDifficulty, MediumGuesses, MediumMinRange, MediumMaxRange)
+		fmt.Printf("%d. Hard (%d Guesses, Range: %d-%d)\n", HardDifficulty, HardGuesses, HardMinRange, HardMaxRange)
 		fmt.Print("Enter choice: ")
 
 		scanner.Scan()
 		input := scanner.Text()
 
 		num, err := strconv.Atoi(input)
-		if err != nil || num < 1 || num > 3 {
-			fmt.Println("Invalid input. Please enter a number between 1 and 3.")
+		if err != nil || num < EasyDifficulty || num > DifficultyOptions {
+			fmt.Println("Invalid input. Please enter a number between", EasyDifficulty, "and", DifficultyOptions, ".")
 			continue
 		}
 
@@ -94,15 +118,12 @@ func difficultySelection() {
 	}
 
 	switch difficulty {
-	case 1:
-		play(generateRandomNumber(1, 50), 10, 1)
-		//fmt.Println("Selected 1!")
-	case 2:
-		play(generateRandomNumber(1, 75), 5, 2)
-		//fmt.Println("Selected 2!")
-	case 3:
-		play(generateRandomNumber(1, 50), 3, 2)
-		//fmt.Println("Selected 3!") //debug for difficulty "case 3 always true"
+	case EasyDifficulty:
+		play(generateRandomNumber(EasyMinRange, EasyMaxRange), EasyGuesses, EasyDifficulty)
+	case MediumDifficulty:
+		play(generateRandomNumber(MediumMinRange, MediumMaxRange), MediumGuesses, MediumDifficulty)
+	case HardDifficulty:
+		play(generateRandomNumber(HardMinRange, HardMaxRange), HardGuesses, HardDifficulty)
 	}
 }
 
@@ -111,22 +132,22 @@ func difficultySelection() {
 func play(target int, totalGuesses int, difficulty int) {
 	var difficultyCeiling int
 	switch difficulty {
-	case 1:
-		difficultyCeiling = 50
-	case 2:
-		difficultyCeiling = 75
-	case 3:
-		difficultyCeiling = 50
+	case EasyDifficulty:
+		difficultyCeiling = EasyMaxRange
+	case MediumDifficulty:
+		difficultyCeiling = MediumMaxRange
+	case HardDifficulty:
+		difficultyCeiling = HardMaxRange
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("Generated a number!")
 	fmt.Println("You have", totalGuesses, "total guesses to guess the number.")
 	fmt.Println("Good luck :^) ")
-	time.Sleep(1 * time.Second)
+	time.Sleep(FeedbackDelay)
 
 	//Guess input begin
-	for num_guesses := 0; num_guesses <= totalGuesses; num_guesses++ {
+	for num_guesses := 0; num_guesses < totalGuesses; num_guesses++ {
 		fmt.Print("Guess: ")
 		scanner.Scan()
 		input := scanner.Text()
@@ -135,16 +156,15 @@ func play(target int, totalGuesses int, difficulty int) {
 		//Inform them it's wrong, but don't penalize them for it
 		guess, err := strconv.Atoi(input)
 		if err != nil {
-			fmt.Println("Invalid input. Please enter a number.")
-			num_guesses-- // Don't count invalid input as an attempt
+			fmt.Println("Invalid input. Please enter a valid number for your guess.")
 			continue
 		}
 
 		//Wildly incorrect Guess
 		//Don't penalize player for it, but let em know it's wildly off
-		if guess < 1 || guess > difficultyCeiling {
-			fmt.Println("Invalid input. Please enter a number more reasonable.")
-			fmt.Println("I'll let you off the hook for that one. You have", totalGuesses-num_guesses, "guesses remaining.")
+		if guess < EasyMinRange || guess > difficultyCeiling {
+			fmt.Printf("Invalid input. Please enter a number between %d and %d.\n", EasyMinRange, difficultyCeiling)
+			fmt.Printf("I'll let you off the hook for that one. You have %d guesses remaining.\n", totalGuesses-num_guesses)
 			num_guesses-- // Don't count invalid input as an attempt
 			continue
 		}
@@ -160,48 +180,46 @@ func play(target int, totalGuesses int, difficulty int) {
 		//Win Condition
 		if guess == target {
 			gameOver(target, num_guesses, true)
-			break
+			return // Exit the play function
 		}
 		//Last guess notification + Game Over Condition
-		if num_guesses == totalGuesses-2 {
+		if num_guesses == totalGuesses-1 {
 			fmt.Println("Last guess! Here's hoping you get it right!")
-			time.Sleep(1 * time.Second)
-		} else if num_guesses == totalGuesses-1 {
-			fmt.Printf("You ran out of guesses!")
-			gameOver(target, num_guesses, false)
-			break
+			time.Sleep(FeedbackDelay)
 		}
 	}
+	// Ran out of guesses
+	fmt.Printf("You ran out of guesses!")
+	gameOver(target, totalGuesses, false)
 }
 
 // gameOver handles the behavior of the end state when a player wins or loses.
 func gameOver(correctNumber int, guessesLeft int, win bool) {
 	if win {
-		fmt.Printf("You win! You got the right number: %v in %v guesses!", correctNumber, guessesLeft+1)
+		fmt.Printf("You win! You got the right number: %v in %v guesses!\n", correctNumber, guessesLeft+1)
 	} else {
-		fmt.Printf("\nGame Over! Womp womp! The correct number was %v.", correctNumber)
+		fmt.Printf("\nGame Over! Womp womp! The correct number was %v.\n", correctNumber)
 	}
 
 	//Play Again input and validation
-	fmt.Printf("\nWould you like to play again?\n1. Yes, 2. No ")
-	var playAgain int
+	fmt.Printf("\nWould you like to play again? (%s/%s): ", PlayAgainYes, PlayAgainNo)
+	var playAgainInput string
+	scanner := bufio.NewScanner(os.Stdin)
 	for {
-		_, err := fmt.Scanln(&playAgain)
-		if err != nil {
+		scanner.Scan()
+		playAgainInput = scanner.Text()
+		playAgainInput = strings.ToUpper(playAgainInput) // Make it case-insensitive
+
+		if playAgainInput == PlayAgainYes {
+			fmt.Println("The grind never stops")
+			return // Return to the main loop to start a new game
+		} else if playAgainInput == PlayAgainNo {
+			playing = false // Exit the main loop
+			fmt.Println("Thank you for playing!! Goodbye!")
 			return
-		} else if playAgain < 1 || playAgain > 2 {
-			fmt.Println("Invalid input. Please enter 1 or 2.")
 		} else {
-			break
+			fmt.Printf("Invalid input. Please enter '%s' or '%s'.\n", PlayAgainYes, PlayAgainNo)
 		}
-	}
-	switch playAgain {
-	case 1:
-		fmt.Println("The grind never stops")
-	case 2:
-		playing = false // Exit the main loop
-		fmt.Println("Thank you for playing!! Goodbye!")
-		break
 	}
 }
 
@@ -227,6 +245,10 @@ func validateName(input string) bool {
 	//Check to see if there is any error in the matching. If there is, throw it.
 	if err != nil {
 		fmt.Println("Error occurred during validateName:", err)
+		return false
+	}
+	if !match {
+		fmt.Println("Invalid input. Name must contain only letters.")
 		return false
 	}
 	return match
