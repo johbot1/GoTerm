@@ -120,26 +120,18 @@ func difficultySelection() {
 
 	switch difficulty {
 	case EasyDifficulty:
-		play(generateRandomNumber(EasyMinRange, EasyMaxRange), EasyGuesses, EasyDifficulty)
+		play(EasyMinRange, EasyMaxRange, EasyGuesses)
 	case MediumDifficulty:
-		play(generateRandomNumber(MediumMinRange, MediumMaxRange), MediumGuesses, MediumDifficulty)
+		play(MediumMinRange, MediumMaxRange, MediumGuesses)
 	case HardDifficulty:
-		play(generateRandomNumber(HardMinRange, HardMaxRange), HardGuesses, HardDifficulty)
+		play(HardMinRange, HardMaxRange, HardGuesses)
 	}
 }
 
 // play begins the game based on the previous difficulty and generated number choices
 // Informs player on their current progress, their guess, and if they win or lose
-func play(target int, totalGuesses int, difficulty int) {
-	var difficultyCeiling int
-	switch difficulty {
-	case EasyDifficulty:
-		difficultyCeiling = EasyMaxRange
-	case MediumDifficulty:
-		difficultyCeiling = MediumMaxRange
-	case HardDifficulty:
-		difficultyCeiling = HardMaxRange
-	}
+func play(minRange, maxRange int, totalGuesses int) {
+	target := generateRandomNumber(minRange, maxRange)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("Generated a number!")
@@ -153,22 +145,14 @@ func play(target int, totalGuesses int, difficulty int) {
 		scanner.Scan()
 		input := scanner.Text()
 
-		//Guess is not a number
-		//Inform them it's wrong, but don't penalize them for it
-		guess, err := strconv.Atoi(input)
-		if err != nil {
-			fmt.Println("Invalid input. Please enter a valid number for your guess.")
+		isValid, errorMessage := validateGuessInput(input, minRange, maxRange)
+		if !isValid {
+			fmt.Println(errorMessage)
+			fmt.Printf("I'll let you off the hook for that one. You have %d guesses remaining.\n", totalGuesses-num_guesses)
 			continue
 		}
 
-		//Wildly incorrect Guess
-		//Don't penalize player for it, but let em know it's wildly off
-		if guess < EasyMinRange || guess > difficultyCeiling {
-			fmt.Printf("Invalid input. Please enter a number between %d and %d.\n", EasyMinRange, difficultyCeiling)
-			fmt.Printf("I'll let you off the hook for that one. You have %d guesses remaining.\n", totalGuesses-num_guesses)
-			num_guesses-- // Don't count invalid input as an attempt
-			continue
-		}
+		guess, _ := strconv.Atoi(input)
 
 		fmt.Println("You guessed", guess)
 		//Warmer/Colder: Guess is off in either direction
@@ -280,6 +264,27 @@ func validateDifficultyInput(input string) (bool, string) {
 	num, _ := strconv.Atoi(input) // Error already checked above
 	if num < EasyDifficulty || num > DifficultyOptions {
 		return false, fmt.Sprintf("Invalid input. Please enter a number between %d and %d for the difficulty.", EasyDifficulty, DifficultyOptions)
+	}
+	return true, ""
+}
+
+func validateGuessInput(input string, min int, max int) (bool, string) {
+	if strings.TrimSpace(input) == "" {
+		return false, "Invalid input. Please enter your guess."
+	}
+	num, err := strconv.Atoi(input)
+	if err != nil {
+		for _, r := range input {
+			if unicode.IsLetter(r) {
+				return false, "Invalid input. Your guess must be a number. Letters are not allowed."
+			} else if !unicode.IsDigit(r) {
+				return false, fmt.Sprintf("Invalid input. You've entered a special character: '%c'. Please enter a number between %d and %d.", r, min, max)
+			}
+		}
+		return false, fmt.Sprintf("Invalid input. Please enter a valid number between %d and %d.", min, max)
+	}
+	if num < min || num > max {
+		return false, fmt.Sprintf("Invalid input. Please enter a number between %d and %d.", min, max)
 	}
 	return true, ""
 }
