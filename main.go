@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 //@Author: <John Botonakis>
@@ -107,12 +107,13 @@ func difficultySelection() {
 		scanner.Scan()
 		input := scanner.Text()
 
-		num, err := strconv.Atoi(input)
-		if err != nil || num < EasyDifficulty || num > DifficultyOptions {
-			fmt.Println("Invalid input. Please enter a number between", EasyDifficulty, "and", DifficultyOptions, ".")
+		isValid, errorMessage := validateDifficultyInput(input)
+		if !isValid {
+			fmt.Println(errorMessage)
 			continue
 		}
 
+		num, _ := strconv.Atoi(input) // Safe to parse as validation passed
 		difficulty = num
 		break
 	}
@@ -225,33 +226,12 @@ func gameOver(correctNumber int, guessesLeft int, win bool) {
 
 // Function to validate if a string contains alphabetical characters only
 func validateName(input string) bool {
-	// Check for empty strings
-	if strings.TrimSpace(input) == "" {
-		fmt.Println("Invalid input. Name cannot be empty.")
+	isValid, errorMessage := validateNameInput(input)
+	if !isValid {
+		fmt.Println(errorMessage)
 		return false
 	}
-
-	// Check for spaces
-	if strings.Contains(input, " ") {
-		fmt.Println("Invalid input. Name cannot contain spaces.")
-		return false
-	}
-	//Check against the alphabet in lower and upper case
-	pattern := "^[A-Za-z]+$"
-	//CODE NOTE: The "^" indicates the start of the string, "$" denotes the end of the string
-
-	match, err := regexp.MatchString(pattern, input)
-
-	//Check to see if there is any error in the matching. If there is, throw it.
-	if err != nil {
-		fmt.Println("Error occurred during validateName:", err)
-		return false
-	}
-	if !match {
-		fmt.Println("Invalid input. Name must contain only letters.")
-		return false
-	}
-	return match
+	return true
 }
 
 // toSnakeCase Function to capitalize the first letter of a string
@@ -262,4 +242,44 @@ func toSnakeCase(input string) string {
 
 	// Capitalize the first letter
 	return strings.ToUpper(string(input[0])) + input[1:]
+}
+
+// validateNameInput checks if the input string is a valid name and returns a boolean and an error message.
+func validateNameInput(input string) (bool, string) {
+	if strings.TrimSpace(input) == "" {
+		return false, "Invalid input. Name cannot be empty."
+	}
+	if strings.Contains(input, " ") {
+		return false, "Invalid input. Name cannot contain spaces."
+	}
+	for _, r := range input {
+		if !unicode.IsLetter(r) {
+			return false, fmt.Sprintf("You've entered a non-letter character: '%c'. Letters only please.", r)
+		}
+	}
+	return true, ""
+}
+
+// validateDifficultyInput checks if the input string is a valid difficulty choice.
+func validateDifficultyInput(input string) (bool, string) {
+	if strings.TrimSpace(input) == "" {
+		return false, "Invalid input. Please enter a difficulty level."
+	}
+	_, err := strconv.Atoi(input)
+	if err != nil {
+		// Check if the input contains any letters or symbols to provide more specific feedback
+		for _, r := range input {
+			if unicode.IsLetter(r) {
+				return false, "Invalid input. Difficulty level must be a number. Letters are not allowed."
+			} else if !unicode.IsDigit(r) {
+				return false, fmt.Sprintf("Invalid input. You've entered a special character: '%c'. Please enter a number between %d and %d.", r, EasyDifficulty, DifficultyOptions)
+			}
+		}
+		return false, fmt.Sprintf("Invalid input. Please enter a number between %d and %d.", EasyDifficulty, DifficultyOptions)
+	}
+	num, _ := strconv.Atoi(input) // Error already checked above
+	if num < EasyDifficulty || num > DifficultyOptions {
+		return false, fmt.Sprintf("Invalid input. Please enter a number between %d and %d for the difficulty.", EasyDifficulty, DifficultyOptions)
+	}
+	return true, ""
 }
