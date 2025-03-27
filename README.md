@@ -1,4 +1,4 @@
-# GoTerm
+# GoTerm ✅
 One of three Go! related projects for my final semester, this one a Terminal based Number Guessing Game!
 
 ## Requirements:
