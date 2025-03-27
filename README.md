@@ -18,11 +18,11 @@ Golang v.1.23.6 or higher
 
 
 # FEEDBACK
-~~- add gitignore~~
-~~- remove .idea files~~
-- add better error display
-- better feedback for handling error input
-~~- Fix retry screen (y reruns the entire program)~~
-~~- Add constants for numbers~~
-- move generate number to play method
-  - Ceiling and other things (Play should take either only 1 or ALL params)
+[X] add gitignore  
+[X] remove .idea files  
+[X]  add better error display  
+[X] better feedback for handling error input  
+[X] Fix retry screen (y reruns the entire program)  
+[X] Add constants for numbers  
+[ ] move generate number to play method  
+    [ ] Ceiling and other things (Play should take either only 1 or ALL params)
