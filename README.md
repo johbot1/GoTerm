@@ -25,5 +25,5 @@ Golang v.1.23.6 or higher
 [X] Fix retry screen (y reruns the entire program)  
 [X] Add constants for numbers  
 [X] move generate number to play method  
-    [X] Ceiling and other things (Play should take either only 1 or ALL params)
+    [X] Ceiling and other things (Play should take either only 1 or ALL params)  
 [] Fix no entry in asking replay question ( Must ask you again, after displaying the error)
