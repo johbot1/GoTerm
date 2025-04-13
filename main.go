@@ -141,6 +141,12 @@ func play(minRange, maxRange int, totalGuesses int) {
 
 	//Guess input begin
 	for num_guesses := 0; num_guesses < totalGuesses; num_guesses++ {
+
+		// If this is the last guess coming up, alert the player *before* asking for input
+		if num_guesses == totalGuesses-1 {
+			fmt.Println("Last guess! Here's hoping you get it right!")
+			time.Sleep(FeedbackDelay)
+		}
 		fmt.Print("Guess: ")
 		scanner.Scan()
 		input := scanner.Text()
@@ -153,8 +159,8 @@ func play(minRange, maxRange int, totalGuesses int) {
 		}
 
 		guess, _ := strconv.Atoi(input)
-
 		fmt.Println("You guessed", guess)
+
 		//Warmer/Colder: Guess is off in either direction
 		if guess > target {
 			fmt.Println("Too high!")
@@ -166,11 +172,6 @@ func play(minRange, maxRange int, totalGuesses int) {
 		if guess == target {
 			gameOver(target, num_guesses, true)
 			return // Exit the play function
-		}
-		//Last guess notification + Game Over Condition
-		if num_guesses == totalGuesses-1 {
-			fmt.Println("Last guess! Here's hoping you get it right!")
-			time.Sleep(FeedbackDelay)
 		}
 	}
 	// Ran out of guesses
@@ -187,25 +188,27 @@ func gameOver(correctNumber int, guessesLeft int, win bool) {
 	}
 
 	//Play Again input and validation
-	fmt.Printf("\nWould you like to play again? (%s/%s): ", PlayAgainYes, PlayAgainNo)
-	var playAgainInput string
 	scanner := bufio.NewScanner(os.Stdin)
-	for {
-		scanner.Scan()
-		playAgainInput = scanner.Text()
-		playAgainInput = strings.ToUpper(playAgainInput) // Make it case-insensitive
+	var playAgainInput string
 
-		if playAgainInput == PlayAgainYes {
+	for {
+		fmt.Printf("\nWould you like to play again? (%s/%s): ", PlayAgainYes, PlayAgainNo)
+		scanner.Scan()
+		playAgainInput = strings.ToUpper(strings.TrimSpace(scanner.Text()))
+
+		switch playAgainInput {
+		case PlayAgainYes:
 			fmt.Println("The grind never stops")
-			return // Return to the main loop to start a new game
-		} else if playAgainInput == PlayAgainNo {
-			playing = false // Exit the main loop
+			return
+		case PlayAgainNo:
+			playing = false
 			fmt.Println("Thank you for playing!! Goodbye!")
 			return
-		} else {
+		default:
 			fmt.Printf("Invalid input. Please enter '%s' or '%s'.\n", PlayAgainYes, PlayAgainNo)
 		}
 	}
+
 }
 
 // Function to validate if a string contains alphabetical characters only
