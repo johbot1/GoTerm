@@ -26,4 +26,5 @@ Golang v.1.23.6 or higher
 [X] Add constants for numbers  
 [X] move generate number to play method  
     [X] Ceiling and other things (Play should take either only 1 or ALL params)
-[] Fix no entry in asking replay question ( Must ask you again, after displaying the error)
+[X] Fix no entry in asking replay question ( Must ask you again, after displaying the error)
+[X] Fix issue informing the player of the last guess
