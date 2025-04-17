@@ -27,4 +27,4 @@ Golang v.1.23.6 or higher
 [X] move generate number to play method  
     [X] Ceiling and other things (Play should take either only 1 or ALL params)
 [X] Fix no entry in asking replay question ( Must ask you again, after displaying the error)
-[X] Fix issue informing the player of the last guess
+[X] Fix issue counting an invalid guess as a valid one

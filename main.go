@@ -155,6 +155,7 @@ func play(minRange, maxRange int, totalGuesses int) {
 		if !isValid {
 			fmt.Println(errorMessage)
 			fmt.Printf("I'll let you off the hook for that one. You have %d guesses remaining.\n", totalGuesses-num_guesses)
+			totalGuesses++
 			continue
 		}
 
